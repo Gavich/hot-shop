@@ -1,0 +1,24 @@
+<div class="footer-container">
+    <div class="footer">
+        <div class="benefit-banners">
+            <?php echo $this->getLayout()->createBlock('cms/block')->setBlockId('benefit_banners')->toHtml() ?>
+        </div>
+        <div class="footer_content">
+            <?php echo $this->getChildHtml('cms_get_the_code') ?>
+            <?php echo $this->getChildHtml('cms_latest_announcements') ?>
+            <?php echo $this->getChildHtml('cms_infocenter') ?>
+            <?php echo $this->getChildHtml('cms_storelocation') ?>
+        </div>
+    </div>
+    <div class="footer last">
+        <?php echo $this->getChildHtml('left.newsletter') ?>
+        <?php echo $this->getChildHtml('secured_payments') ?>
+        <?php echo $this->getChildHtml('payment_accept') ?>
+        <?php echo $this->getChildHtml('free_shipping_via') ?>
+    </div>
+    <div class="footer_add">
+        <?php echo $this->getChildHtml('footerlinks') ?>
+        <address><?php echo $this->getCopyright() ?></address>
+        <span class="legalnotices"><?php echo $this->getChildHtml('legal_notices') ?></span>
+    </div>
+</div>
