@@ -9,9 +9,9 @@
 magicento.phpstorm.meta.php
 nbproject/
 
-#.htaccess
-#app/etc/local.xml
-# media/*
-# var/*
-#google*.html
-#downloader/.cache/*
+.htaccess
+app/etc/local.xml
+ media/*
+ var/*
+google*.html
+downloader/.cache/*
