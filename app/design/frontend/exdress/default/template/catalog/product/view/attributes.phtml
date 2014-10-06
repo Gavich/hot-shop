@@ -1,0 +1,37 @@
+<?php
+/**
+ * Magento
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2010 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ *
+ * Product additional attributes template
+ * @see Mage_Catalog_Block_Product_View_Attributes
+ */
+?>
+<?php
+    $_helper = $this->helper('catalog/output');
+    $_product = $this->getProduct()
+?>
+<?php if($_additional = $this->getAdditionalData()): ?>
+    <?php
+        if(isset($_additional['color'])) {
+            $color = $_additional['color'];
+            unset($_additional['color']);
+            array_unshift($_additional, $color);
+        }
+    ?>
+
+    <ul class="product-attributes-list">
+        <?php foreach ($_additional as $_data): ?>
+            <?php if ($_data['value'] == 'N/A' || $_data['value'] == 'No') continue ?>
+            <li>
+                <span class="label"><?php echo $this->htmlEscape($this->__($_data['label'])) ?>:</span>
+                <p><?php echo $_helper->productAttribute($_product, $_data['value'], $_data['code']) ?></p>
+                <div class="clearfix"></div>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif;?>
