@@ -9,6 +9,12 @@ class TC_AdmitadImport_Model_Resource_Product extends Mage_Catalog_Model_Resourc
 {
     const BATCH_SIZE = 1000;
 
+    public $_config;
+    const CONF_TABLE = 'art_init';
+    const TEXT_ATTRIBUTES_TABLE = 'texts';
+    protected $_adapter;
+
+
     /**
      * Get SKUs for all existed products
      *
@@ -36,6 +42,26 @@ class TC_AdmitadImport_Model_Resource_Product extends Mage_Catalog_Model_Resourc
             ->where('t2.attribute_id = ?',$codeAttribute);
 
         return  $this->_getReadAdapter()->fetchPairs($select);
+    }
+
+    /**
+     * Get Configurable Products Ids for all existed products
+     *
+     * @return array
+     */
+    public function getConfigurablesId(){
+        $select = $this->_getReadAdapter()->select()
+            ->from($this->getTable('catalog/product'), array('sku', 'entity_id'))
+            ->where('type_id = "configurable"');
+        return  $this->_getReadAdapter()->fetchPairs($select);
+    }
+
+    public function getAdapter()
+    {
+        if(!$this->_adapter){
+            $this->_adapter = Mage::getModel('core/resource')->getConnection('core_write');
+        }
+        return $this->_adapter;
     }
 
     /**
@@ -80,5 +106,13 @@ class TC_AdmitadImport_Model_Resource_Product extends Mage_Catalog_Model_Resourc
             $adapter->rollBack();
             throw $e;
         }
+    }
+
+    public function getConfig(){
+        if($this->_config == null){
+            $this->_config = Mage::getModel('tc_admitadimport/product_config');
+        }
+
+        return $this->_config;
     }
 }
