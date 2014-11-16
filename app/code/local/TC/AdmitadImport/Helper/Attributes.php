@@ -65,8 +65,8 @@ class TC_AdmitadImport_Helper_Attributes extends Mage_Core_Helper_Abstract
 
             $data = array(
                 'attribute_code' => $code,
-                'is_global' => 0,
-                'frontend_input' => 'multiselect',
+                'is_global' => 1,
+                'frontend_input' => 'select',
                 'default_value_text' => '',
                 'default_value_yesno' => 0,
                 'default_value_date' => '',
@@ -74,7 +74,7 @@ class TC_AdmitadImport_Helper_Attributes extends Mage_Core_Helper_Abstract
                 'is_unique' => 0,
                 'is_required' => 0,
                 'frontend_class' => '',
-                'is_configurable' => 0,
+                'is_configurable' => 1,
                 'is_searchable' => 0,
                 'is_visible_in_advanced_search' => 0,
                 'is_comparable' => 0,
@@ -121,7 +121,9 @@ class TC_AdmitadImport_Helper_Attributes extends Mage_Core_Helper_Abstract
             $model->setIsUserDefined(1);
             try{
                 $model->save();
-            }catch (Exception $e){}
+            }catch (Exception $e){
+                Mage::logException($e);
+            }
 
 
 
@@ -204,11 +206,11 @@ class TC_AdmitadImport_Helper_Attributes extends Mage_Core_Helper_Abstract
         $attributes           = array();
         $attributesSourceData = array_merge($data, $data['param']);
         foreach ($this->_map as $attributeCode => $sourceCode) {
-            if(!$this->checkAttributeCreated($attributeCode) && $attributeCode != 'size' && $attributeCode != 'sizes'){
+            /*if(!$this->checkAttributeCreated($attributeCode) && $attributeCode != 'size' && $attributeCode != 'sizes'){
                 $this->createAttribute($attributeCode,$sourceCode);
                 $filter_id = $this->addToFilter($attributeCode);
                 $this->saveFilter($filter_id, $attributeCode);
-            }
+            }*/
             if (!empty($attributesSourceData[$sourceCode])) {
                 $attributes[$attributeCode] = $this->_prepareAttributeValue(
                     $attributeCode, $attributesSourceData[$sourceCode]
@@ -410,6 +412,8 @@ class TC_AdmitadImport_Helper_Attributes extends Mage_Core_Helper_Abstract
                     break;
                 case 'select':
                     /*$this->_prepareAttributeOptions($attribute, is_array($value) ? $value : explode(',', $value));*/
+                    $value = $this->prepareAttributeOptions($attributeCode, $value);
+                    $attribute = $this->_getAttribute($attributeCode);
                     $newValue = array();
                     break;
                 case 'decimal':
@@ -436,7 +440,7 @@ class TC_AdmitadImport_Helper_Attributes extends Mage_Core_Helper_Abstract
                 } else {
                     $setValue = null;
                     foreach ($options as $item) {
-                        if ($item['label'] == $value) {
+                        if (in_array($item['label'], $value)) {
                             $newValue = $item['value'];
                             break;
                         }

@@ -37,11 +37,30 @@ class TC_AdmitadImport_Model_Resource_Product extends Mage_Catalog_Model_Resourc
         $eavAttribute = new Mage_Eav_Model_Mysql4_Entity_Attribute();
         $codeAttribute = $eavAttribute->getIdByCode('catalog_product', 'ad_redirect_url');
         $select = $this->_getReadAdapter()->select()
-            ->from(array('t2'=>'catalog_product_entity_varchar'), array('value') )
-            ->join(array('t1'=>$this->getTable('catalog/product')),'t1.entity_id=t2.entity_id',array('sku'))
-            ->where('t2.attribute_id = ?',$codeAttribute);
+            ->from(array('t1'=>'catalog_product_entity_varchar'), array('value') )
+            ->join(array('t2'=>$this->getTable('catalog/product')),'t2.entity_id=t1.entity_id',array('sku'))
+            ->where('t1.attribute_id = ?',$codeAttribute);
 
         return  $this->_getReadAdapter()->fetchPairs($select);
+    }
+
+    /**
+     * Get Configurable Attribute for all existed products
+     *
+     * @return array
+     */
+    public function getConfigurableAttribute()
+    {
+        $select = $this->_getReadAdapter()->select()
+            ->from(array('t1'=>'catalog_eav_attribute'), array('attribute_id') )
+            ->join(array('t2'=>'eav_attribute'),'t1.attribute_id=t2.attribute_id',array('attribute_code'))
+            ->where('t2.frontend_input = ?','select')
+            ->where('t1.is_global = ?',1)
+            ->where('t1.is_configurable = ?',1)
+            ->where('t1.is_filterable = ?',1);
+
+        $result = $this->_getReadAdapter()->fetchPairs($select);
+        return  $result;
     }
 
     /**
@@ -51,9 +70,13 @@ class TC_AdmitadImport_Model_Resource_Product extends Mage_Catalog_Model_Resourc
      */
     public function getConfigurablesId(){
         $select = $this->_getReadAdapter()->select()
-            ->from($this->getTable('catalog/product'), array('sku', 'entity_id'))
-            ->where('type_id = "configurable"');
-        return  $this->_getReadAdapter()->fetchPairs($select);
+            ->from(array('t1'=>$this->getTable('catalog/product')), array('sku', 'entity_id'))
+            ->where('t1.type_id = ?',"configurable");
+        $result = array();
+        foreach($this->_getReadAdapter()->fetchPairs($select) as $sku => $id){
+            $result[$sku]['id'] = $id;
+        }
+        return  $result;
     }
 
     public function getAdapter()
