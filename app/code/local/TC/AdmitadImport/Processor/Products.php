@@ -16,6 +16,9 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
     /** @var array */
     private $_existSKUs = array();
 
+    /** @var array */
+    private $_configurableAttribute = array();
+
     /** @var int */
     private $_attributeSetId;
 
@@ -36,6 +39,10 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
 
     /** @var array */
     private $_existURLs = array();
+
+    public $_existConfigurablesId;
+
+    public $idsConfigurableAttribute;
 
     /**
      * Performs import
@@ -71,12 +78,13 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
 
     public function  existURL($product)
     {
-        $url =  trim($product->getAdRedirectUrl());
-        if(isset($this->_existURLs[$url])){
+        $url = $product->getAttributeLable('ad_redirect_url');//getAdRedirectUrl();
+        //$url = trim($url);
+        if(array_key_exists($url,$this->_existURLs)){
             $this->updateProduct($product, $this->_existURLs[$url]);
             return true;
         }
-        $this->_existURLs[$url] = $product->getSku();
+        $this->_existURLs[$url] = $product->$url;
         return false;
     }
 
@@ -126,23 +134,26 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
         $persisted    = 0;
 
         $this->_getResourceUtilityModel()->beginTransaction();
-        foreach ($products as $sku => $productData) {
+        foreach ($products as $sku => $productData){
             try {
                 if (!array_key_exists($sku, $this->_existSKUs) && !in_array($sku, $this->_processedSKUs)) {
+                    $groupId = $productData{"group_id"};
                     $product = $this->_prepareProduct($productData, $store);
+                    if(!array_key_exists($groupId,$this->_existConfigurablesId)){
+                        $this->createConfigurableProduct(clone $product, $productData);
+                    }
                     $product->setData('sku', $sku);
-                    if(!$this->existURL($product)){
+                    $product->setData('name', ucfirst($product->getData('name'))); // enforce first capital letter
 
-                        $product->setData('name', ucfirst($product->getData('name'))); // enforce first capital letter
+                    $product->getResource()->save($product);
+                    $this->_saveStockItem($product);
+                    $helper->processCustomOptions($product);
+                    $this->_helperImages->collectData($product, $productData);
 
-                        $product->getResource()->save($product);
-                        $this->_saveStockItem($product);
-                        $helper->processCustomOptions($product);
-                        $this->_helperImages->collectData($product, $productData);
+                    $this->_existConfigurablesId[$groupId]["child"][] = $product->getId();
 
-                        $this->_getLogger()->log(sprintf('Product with SKU: %s processed', $sku));
-
-                        $persisted++;
+                    $this->_getLogger()->log(sprintf('Product with SKU: %s processed', $sku));
+                    $persisted++;
 
                         if (0 === $persisted % self::BATCH_SIZE) {
                             $this->_getResourceUtilityModel()->commit();
@@ -151,11 +162,9 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
                         }
 
                         $product->clearInstance();
-                    }else{
-                        $product->clearInstance();
-                        continue;
-                    }
+
                 } else {
+                    $this->_existConfigurablesId[$productData["group_id"]]["child"][] = $this->_existSKUs[$sku];
                     $this->_getLogger()->log(sprintf('Product with SKU: %s already exist, skipping..', $sku));
                 }
 
@@ -174,7 +183,59 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
         }
 
         $this->_getResourceUtilityModel()->commit();
+        $this->setSimpleProductIdsToConfigurables();
         $this->_helperImages->processImages();
+    }
+
+    public function getConfigurableAttributesIds($product)
+    {
+        $idsConfigurableAttribute = array();
+        foreach($this->_configurableAttribute as $id=>$code){
+            if($product->getData($code)){
+                $idsConfigurableAttribute[] = $id;
+            }
+        }
+        return $idsConfigurableAttribute;
+    }
+
+    public function createConfigurableProduct($product, $productData)
+    {
+        $this->_getLogger()->log('createConfigurableProduct - start');
+        $sku = $productData['group_id'];
+        $product->setData('sku',$sku);
+        $product->setData('type_id','configurable');
+        $product->setData('visibility',Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH);
+        $product->setData('name', ucfirst($product->getData('name'))); // enforce first capital letter
+        $product->getTypeInstance()->setUsedProductAttributeIds($this->getConfigurableAttributesIds($product)); //attribute ID of attribute 'color' in my store
+
+        $configurableAttributesData = $product->getTypeInstance()->getConfigurableAttributesAsArray();
+
+        $product->setCanSaveConfigurableAttributes(true);
+        $product->setConfigurableAttributesData($configurableAttributesData);
+
+        $product->save($product);
+
+        Mage::helper('tc_admitadimport/attributes')->processCustomOptions($product);
+        $this->_helperImages->collectData($product, $productData);
+        $this->_existConfigurablesId[$sku]['id'] = $product->getId();
+
+        $this->_getLogger()->log(sprintf('Product with SKU: %s processed', $sku));
+    }
+
+    /** Add simple product id to configurable product */
+
+    public function setSimpleProductIdsToConfigurables()
+    {
+        foreach($this->_existConfigurablesId as $sku => $data){
+            $configurableProduct = Mage::getModel('catalog/product')->load($data["id"]);
+            Mage::getResourceSingleton('catalog/product_type_configurable')
+                ->saveProducts($configurableProduct, $data["child"]);
+        }
+       /* $configurableProduct = Mage::getModel('catalog/product')->load($configurableProductId);
+        $productsIds = $configurableProduct->getTypeInstance()->getUsedProductIds($configurableProduct);
+        $productsIds[] = $simpleProductId;
+        Mage::getResourceSingleton('catalog/product_type_configurable')
+            ->saveProducts($configurableProduct, $productsIds);*/
     }
 
     /**
@@ -198,7 +259,6 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
         $this->_prepareCategories($data, $catalogProduct);
         $this->_prepareAttributes($data, $catalogProduct);
         $this->_preparePrices($data, $catalogProduct);
-
         return $catalogProduct;
     }
 
@@ -318,7 +378,7 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
             'price'            => 0,
             'tax_class_id'     => 0,
             'status'           => Mage_Catalog_Model_Product_Status::STATUS_ENABLED,
-            'visibility'       => Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
+            'visibility'       => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE,
             'stock_data'       => array(
                 'use_config_manage_stock' => 0,
                 'manage_stock'            => 0,
@@ -334,7 +394,9 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
     protected function _beforeProcess()
     {
         $this->_existSKUs      = $this->_getResourceUtilityModel()->getSKUs();
-        $this->_existURLs       = $this->_getResourceUtilityModel()->getURLs();
+        $this->_existConfigurablesId = $this->_getResourceUtilityModel()->getConfigurablesId();
+        //$this->_existURLs       = $this->_getResourceUtilityModel()->getURLs();
+        $this->_configurableAttribute = $this->_getResourceUtilityModel()->getConfigurableAttribute();
         $this->_currencyHelper = Mage::helper('tc_admitadimport/currency');
         $this->_helperImages = Mage::helper('tc_admitadimport/images');
         $this->_helperImages->setLogger($this->_getLogger());
@@ -346,7 +408,7 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
      */
     protected function _afterProcess()
     {
-        $this->_helperImages->terminate();
+        //$this->_helperImages->terminate();
         $toDisable = array_diff(array_keys($this->_existSKUs), $this->_processedSKUs);
 
         $this->_getLogger()->log('Update status process started');
@@ -365,7 +427,7 @@ class TC_AdmitadImport_Processor_Products extends TC_AdmitadImport_Processor_Abs
      */
     private function _getResourceUtilityModel()
     {
-        return Mage::getResourceModel('tc_admitadimport/product');
+            return Mage::getResourceModel('tc_admitadimport/product');
     }
 
     /**

@@ -1,0 +1,62 @@
+{
+	"select":{
+		"configurable":{
+			"original_id" : {},
+			"name":{},
+			"cats":{"as":"cat_id"},
+			"url":{"as" : "original_url"},
+			"id":{"as":"id_field"}
+		},
+		"texts":{
+			"descr1" : {"as":"short_description"},
+			"descr2" : {"as":"description"},
+			"descr_add" : {},
+			"descr_quality" : {},
+			"descr_form" : {},
+			"descr_brandtext" : {},
+			"descr_instr" : {}
+		},
+		"simple":{
+			"sku" : {},
+			"dim1" : {},
+			"dim2" : {},
+			"dim3" : {},
+			"dim4" : {},
+			"dim5" : {},
+			"Images" : {"as" : "init_image"},
+			"price" : {},
+			"oldPrice" : {"as" : "special_price"}
+		},
+		"unique_filter":{
+			"dim1" : {},
+			"dim2" : {},
+			"dim3" : {},
+			"dim4" : {},
+			"dim5" : {}
+		}
+	},
+	"csv":{
+		"required":{
+			"configurable_attributes" : {},
+			"attribute_set" : {"default" : "Default"},
+			"has_options" : {"default" : "0"},
+			"tax_class_id" : {"default" : "0"},
+			"store" : {"default" : "1"},
+			"status" : {"default" : "1"},
+			"visibility " : {"default" : "4"},
+			"is_in_stock " : {"default" : "1"},
+			"manage_stock " : {"default" : "0"},
+			"websites " : {"default" : "base"},
+			"is_photo_processed" : {},
+			"association_id" : {},
+			"url_key" : {}
+		},
+		"configurable_attributes":{
+			"dim1" : {},
+			"dim2" : {},
+			"dim3" : {},
+			"dim4" : {},
+			"dim5" : {}
+		}
+	}
+}
