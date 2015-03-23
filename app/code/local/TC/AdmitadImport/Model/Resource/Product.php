@@ -9,6 +9,12 @@ class TC_AdmitadImport_Model_Resource_Product extends Mage_Catalog_Model_Resourc
 {
     const BATCH_SIZE = 1000;
 
+    public $_config;
+    const CONF_TABLE = 'art_init';
+    const TEXT_ATTRIBUTES_TABLE = 'texts';
+    protected $_adapter;
+
+
     /**
      * Get SKUs for all existed products
      *
@@ -31,11 +37,54 @@ class TC_AdmitadImport_Model_Resource_Product extends Mage_Catalog_Model_Resourc
         $eavAttribute = new Mage_Eav_Model_Mysql4_Entity_Attribute();
         $codeAttribute = $eavAttribute->getIdByCode('catalog_product', 'ad_redirect_url');
         $select = $this->_getReadAdapter()->select()
-            ->from(array('t2'=>'catalog_product_entity_varchar'), array('value') )
-            ->join(array('t1'=>$this->getTable('catalog/product')),'t1.entity_id=t2.entity_id',array('sku'))
-            ->where('t2.attribute_id = ?',$codeAttribute);
+            ->from(array('t1'=>'catalog_product_entity_varchar'), array('value') )
+            ->join(array('t2'=>$this->getTable('catalog/product')),'t2.entity_id=t1.entity_id',array('sku'))
+            ->where('t1.attribute_id = ?',$codeAttribute);
 
         return  $this->_getReadAdapter()->fetchPairs($select);
+    }
+
+    /**
+     * Get Configurable Attribute for all existed products
+     *
+     * @return array
+     */
+    public function getConfigurableAttribute()
+    {
+        $select = $this->_getReadAdapter()->select()
+            ->from(array('t1'=>'catalog_eav_attribute'), array('attribute_id') )
+            ->join(array('t2'=>'eav_attribute'),'t1.attribute_id=t2.attribute_id',array('attribute_code'))
+            ->where('t2.frontend_input = ?','select')
+            ->where('t1.is_global = ?',1)
+            ->where('t1.is_configurable = ?',1)
+            ->where('t1.is_filterable = ?',1);
+
+        $result = $this->_getReadAdapter()->fetchPairs($select);
+        return  $result;
+    }
+
+    /**
+     * Get Configurable Products Ids for all existed products
+     *
+     * @return array
+     */
+    public function getConfigurablesId(){
+        $select = $this->_getReadAdapter()->select()
+            ->from(array('t1'=>$this->getTable('catalog/product')), array('sku', 'entity_id'))
+            ->where('t1.type_id = ?',"configurable");
+        $result = array();
+        foreach($this->_getReadAdapter()->fetchPairs($select) as $sku => $id){
+            $result[$sku] = array('id' => $id);
+        }
+        return  $result;
+    }
+
+    public function getAdapter()
+    {
+        if(!$this->_adapter){
+            $this->_adapter = Mage::getModel('core/resource')->getConnection('core_write');
+        }
+        return $this->_adapter;
     }
 
     /**
@@ -80,5 +129,13 @@ class TC_AdmitadImport_Model_Resource_Product extends Mage_Catalog_Model_Resourc
             $adapter->rollBack();
             throw $e;
         }
+    }
+
+    public function getConfig(){
+        if($this->_config == null){
+            $this->_config = Mage::getModel('tc_admitadimport/product_config');
+        }
+
+        return $this->_config;
     }
 }

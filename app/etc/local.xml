@@ -28,10 +28,10 @@
 <config>
     <global>
         <install>
-            <date><![CDATA[Mon, 17 Feb 2014 00:32:00 +0000]]></date>
+            <date><![CDATA[Mon, 01 Sep 2014 15:40:40 +0000]]></date>
         </install>
         <crypt>
-            <key><![CDATA[83770718d41b61730b7e845a72f83aa4]]></key>
+            <key><![CDATA[5037fa3866e136fe210103b7b2a57c28]]></key>
         </crypt>
         <disable_local_modules>false</disable_local_modules>
         <resources>
@@ -43,7 +43,7 @@
                     <host><![CDATA[localhost]]></host>
                     <username><![CDATA[root]]></username>
                     <password><![CDATA[AwnQtG]]></password>
-                    <dbname><![CDATA[moda_spb]]></dbname>
+                    <dbname><![CDATA[dev1_drug]]></dbname>
                     <initStatements><![CDATA[SET NAMES utf8]]></initStatements>
                     <model><![CDATA[mysql4]]></model>
                     <type><![CDATA[pdo_mysql]]></type>

@@ -1,0 +1,50 @@
+** - need to create, ++ add automatically, -- need to change				DONE
+
+CONFIGURABLE:
+																			** original_id => id 
+cat_id => cats
+name => name
+																			** brand_logo => brand_logo
+price => init_price
+																			** init_image => init_image
+sku => init_sku
+** selingpoints => selingpoints
+																			short_description => descr1
+																			description => descr2
+																			** descr_add => descr_add
+																			** descr_quality => descr_quality
+																			** descr_form => descr_form
+																			** descr_brandtext => descr_brandtext
+																			** descr_instr => descr_instr
+++ attribute_set
+++ type
+++ has_options
+++ tax_class_id
+++ store
+++ status
+++ visible
+++ configurable_attributes
+																				-- weight form required
+
+SIMPLE:
+** dim1 => dim1
+** dim2 => dim2
+** dim3 => dim3
+** dim5 => dim4
+** dim5 => dim5
+																			** init_image => init_image
+sku => cocat(sku+dims...)
+++ association_id => parent sku
+																			** image_main => image_main
+																			** init_image => image_all
+price => price
+special_price => old_price
+																			** market_text => market_text
+
+ALL PRODUCTS:
+																				is_foto_processed?
+																				1 not needed
+																				2 needed
+																				3 processed
+
+need to add multiplier for price in BO
