@@ -541,11 +541,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
                     $label = $attribute->getLabel();
                     $value = $attribute->getProductAttribute();
                     if ($value->getSourceModel()) {
-                        if (!Mage::app()->getStore()->isAdmin()) {
-                        $value = $value->getSource()->getNeededOptionText($attributeValue);
-} else {
                         $value = $value->getSource()->getOptionText($attributeValue);
-}
                     }
                     else {
                         $value = '';
