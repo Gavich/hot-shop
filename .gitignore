@@ -12,11 +12,16 @@ nbproject/
 .htaccess
 app/etc/local.xml
 <<<<<<< HEAD
+<<<<<<< HEAD
 media/*
 var/*
 =======
  media/*
  var/*
 >>>>>>> origin/development
+=======
+ media/*
+ var/*
+>>>>>>> 2a1100626f7f4a316dbcdfa4f7defd869ca5331b
 google*.html
 downloader/.cache/*
