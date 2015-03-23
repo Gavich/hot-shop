@@ -57,18 +57,9 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection
     protected $_product;
 
     /**
-     * http://turnkeye.com/blog/magento-perfomance-optimization-of-configurable-products/
-     *
-     */
-
-
-    protected static $_pricings = array();
-    /**
      * Initialize connection and define table names
      *
      */
-
-
     protected function _construct()
     {
         $this->_init('catalog/product_type_configurable_attribute');
@@ -248,23 +239,17 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection
 
             $values = array();
 
-            $__prods = $this->getProduct()->getTypeInstance(true)->getUsedProducts(null, $this->getProduct());
             foreach ($this->_items as $item) {
-                $productAttribute = $item->getProductAttribute();
-                if (!($productAttribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract)) {
-                    continue;
-                }
-                //  $options = $productAttribute->getFrontend()->getSelectOptions();
-                $_options = array();
-                foreach ($__prods as $associatedProduct) {
-                    $_options[] = $associatedProduct->getData($productAttribute->getAttributeCode());
-                }
-                $options = $productAttribute->getSource()->getNeededOptions($_options);
-                foreach ($options as $option) {
-                    foreach ($__prods as $associatedProduct) {
+               $productAttribute = $item->getProductAttribute();
+               if (!($productAttribute instanceof Mage_Eav_Model_Entity_Attribute_Abstract)) {
+                   continue;
+               }
+               $options = $productAttribute->getFrontend()->getSelectOptions();
+               foreach ($options as $option) {
+                   foreach ($this->getProduct()->getTypeInstance(true)->getUsedProducts(null, $this->getProduct()) as $associatedProduct) {
                         if (!empty($option['value'])
                             && $option['value'] == $associatedProduct->getData(
-                                $productAttribute->getAttributeCode())) {
+                                                        $productAttribute->getAttributeCode())) {
                             // If option available in associated product
                             if (!isset($values[$item->getId() . ':' . $option['value']])) {
                                 // If option not added, we will add it.
@@ -280,9 +265,10 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection
                                 );
                             }
                         }
-                    }
-                }
+                   }
+               }
             }
+
             foreach ($pricings[0] as $pricing) {
                 // Addding pricing to options
                 $valueKey = $pricing['product_super_attribute_id'] . ':' . $pricing['value_index'];
