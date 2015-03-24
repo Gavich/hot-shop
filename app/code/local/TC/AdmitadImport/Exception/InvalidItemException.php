@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @category   TC
  * @package    TC_AdmitadImport
@@ -9,7 +8,6 @@ class TC_AdmitadImport_Exception_InvalidItemException extends Exception
 {
     /** @var array */
     private $_product;
-
     /**
      * Constructor
      *
@@ -21,7 +19,6 @@ class TC_AdmitadImport_Exception_InvalidItemException extends Exception
         $this->_product = $product;
         parent::__construct(sprintf('Invalid product data, errors: %s', implode(', ', $errors)));
     }
-
     /**
      * Getter for invalid product data
      *
