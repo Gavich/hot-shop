@@ -50,7 +50,8 @@
                 <input type="hidden" name="related_product" id="related-products-field" value="" />
             </div>
             <div class="product-img-box">
-                <?php echo $this->getChildHtml('media') ?>
+                <?php echo $this->getChildHtml('media'); ?>
+<?php echo $this->getBlockHtml('media'); ?>
             </div>
             <div class="product-shop">
                 <?php echo $this->getChildHtml('alert_urls') ?>

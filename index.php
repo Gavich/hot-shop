@@ -70,7 +70,7 @@ if (file_exists($maintenanceFile)) {
 require_once $mageFilename;
 require_once rtrim(__DIR__, DS) . DS . 'lib' . DS . 'vendor' . DS . 'autoload.php';
 
-#Varien_Profiler::enable();
+Varien_Profiler::enable();
 
 if (isset($_SERVER['MAGE_IS_DEVELOPER_MODE'])) {
     Mage::setIsDeveloperMode(true);

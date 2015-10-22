@@ -42,8 +42,8 @@
                 <connection>
                     <host><![CDATA[localhost]]></host>
                     <username><![CDATA[root]]></username>
-                    <password><![CDATA[AwnQtG]]></password>
-                    <dbname><![CDATA[moda_spb]]></dbname>
+                    <password><![CDATA[Get#1forLM]]></password>
+                    <dbname><![CDATA[dev4_drug]]></dbname>
                     <initStatements><![CDATA[SET NAMES utf8]]></initStatements>
                     <model><![CDATA[mysql4]]></model>
                     <type><![CDATA[pdo_mysql]]></type>

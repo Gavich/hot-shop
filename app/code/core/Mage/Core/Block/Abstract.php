@@ -629,7 +629,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         }
 
         $child = $this->getChild($name);
-
         if (!$child) {
             $html = '';
         } else {

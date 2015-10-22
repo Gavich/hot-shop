@@ -114,15 +114,7 @@
                                 <?php echo $this->getReviewsSummaryHtml($_product, 'short', false) ?>
                             <?php endif; ?>
 
-                            <?php if($_product->isConfigurable() && ($swatches = $this->helper('catalog')->getSwatches($_product))): ?>
-                                <div class="configurable-colors">
-                                    <ul>
-                                        <?php foreach ($swatches as $key => $swatch): ?>
-                                            <li class="color-<?php echo $key; ?>" style="background: url('<?php echo $swatch['url']; ?>') no-repeat;">&nbsp;</li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                </div>
-                            <?php endif ?>
+             
 
                             <?php echo $this->getPriceHtml($_product, true) ?>
 
